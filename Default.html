@@ -23,7 +23,7 @@ function startGame() {
     var img = document.getElementById("ruth");
     myGamePiece = new component(30, 40, "red", 10, 120, "image", img);
     myGamePiece.gravity = 0.05;
-    myScore = new component("30px", "Consolas", "black", 280, 40, "text");
+    myScore = new component("30px", "Consolas", "black", 250, 40, "text");
     myGameArea.start();
 }
 
@@ -107,9 +107,10 @@ function updateGameArea() {
 
     for (i = 0; i < myBonuses.length; i += 1) {
         if (myGamePiece.crashWith(myBonuses[i])) {
-            myScore+=100;
+            myScore+=1;
         }
     }
+	
     myGameArea.clear();
     myGameArea.frameNo += 1;
     if (myGameArea.frameNo == 1 || everyinterval(150)) {
@@ -122,11 +123,17 @@ function updateGameArea() {
         gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
         myObstacles.push(new component(10, height, "green", x, 0,"color"));
         myObstacles.push(new component(10, x - height - gap, "green", x, height + gap, "color"));
+	}
 
-        myBonuses.push(new component(10, height, "pink", x, 0, "color"));
-        myBonuses.push(new component(10, x - height - gap, "pink", x, height + gap, "color"));
-    }
-
+	if (myGameArea.frameNo == 1 || everyinterval(300)) {
+        x = myGameArea.canvas.width+Math.floor((Math.random() * 100) + 50);
+        minHeight = 20;
+        maxHeight = 200;
+        height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
+		y = Math.floor((Math.random() * 200) + 20);
+        myBonuses.push(new component(10, height, "pink", x, y,"color"));
+        
+	}
     for (i = 0; i < myObstacles.length; i += 1) {
         myObstacles[i].x += -1;
         myObstacles[i].update();
@@ -136,7 +143,7 @@ function updateGameArea() {
         myBonuses[i].x += -1;
         myBonuses[i].update();
     }
-    myScore.text="SCORE: " + myGameArea.frameNo;
+    myScore.text="SCORE: " + myGameArea.frameNo + " days";
     myScore.update();
     myGamePiece.newPos();
     myGamePiece.update();
@@ -153,7 +160,7 @@ function accelerate(n) {
     </script>
     <br>
     <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)">ACCELERATE</button>
-    <p>Use the ACCELERATE button to stay in the air</p>
-    <p>How long can you stay alive?</p>
+    <p>Use the ACCELERATE button to keep Ruth in the air</p>
+    <p>How longer can Ruth stay alive?</p>
 </body>
 </html>
