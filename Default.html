@@ -10,6 +10,9 @@
     </style>
 </head>
 <body onload="startGame()">
+
+    <p>Click SPACEBAR on your keyboard to keep Ruth in the air</p>
+    <p>How longer can Ruth stay alive?</p>
     <img id="ruth" width="30" height="40" src="images/ruth.jpg" alt="Ruth">
 
     Bonuses:
@@ -43,6 +46,19 @@
             var bonus5 = document.getElementById("book");
 
             bonusesImages.push(bonus1, bonus2, bonus3, bonus4, bonus5);
+
+            document.addEventListener("keydown", function (event) {
+                if(event.which == 32)
+                {
+                    accelerate(-0.2);
+                }
+            });
+
+            document.addEventListener("keyup", function (event) {
+                if (event.which == 32) {
+                    accelerate(0.05);
+                }
+            });
 
             myGameArea.start();
         }
@@ -92,7 +108,19 @@
                 this.x += this.speedX;
                 this.y += this.speedY + this.gravitySpeed;
                 this.hitBottom();
+                this.hitTop();
             }
+
+            this.remove = function () {
+                score = new component("30px", "Consolas", "red", this.x, this.y, "text");
+                score.text = "+10";
+                score.update();
+                
+                this.x += 1000;
+                this.y += 1000;
+              
+            }
+
             this.hitBottom = function () {
                 var rockbottom = myGameArea.canvas.height - this.height;
                 if (this.y > rockbottom) {
@@ -100,6 +128,15 @@
                     this.gravitySpeed = 0;
                 }
             }
+
+            this.hitTop = function () {
+                if (this.y < 0) {
+                    this.y = 0;
+                    this.gravitySpeed = 0;
+                }
+            }
+
+
             this.crashWith = function (otherobj) {
                 var myleft = this.x;
                 var myright = this.x + (this.width);
@@ -127,7 +164,8 @@
 
             for (i = 0; i < myBonuses.length; i += 1) {
                 if (myGamePiece.crashWith(myBonuses[i])) {
-                    catchedBonuses += 100;
+                    catchedBonuses += 10;
+                    myBonuses[i].remove();
                 }
             }
 
@@ -138,8 +176,8 @@
                 minHeight = 20;
                 maxHeight = 200;
                 height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
-                minGap = 50;
-                maxGap = 600;
+                minGap = 200;
+                maxGap = 400;
                 gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
                 myObstacles.push(new component(10, height, "green", x, 0, "color"));
                 myObstacles.push(new component(10, x - height - gap, "green", x, height + gap, "color"));
@@ -184,8 +222,6 @@
         }
     </script>
     <br>
-    <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)">ACCELERATE</button>
-    <p>Use the ACCELERATE button to keep Ruth in the air</p>
-    <p>How longer can Ruth stay alive?</p>
+   
 </body>
 </html>
