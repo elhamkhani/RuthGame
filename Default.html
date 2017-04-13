@@ -12,151 +12,176 @@
 <body onload="startGame()">
     <img id="ruth" width="30" height="40" src="images/ruth.jpg" alt="Ruth">
 
+    Bonuses:
+    <img id="dietCoke" width="30" height="52" src="images/dietCoke.png" alt="Diet Coke">
+    <img id="cat" width="66" height="40" src="images/cat.png" alt="Cat">
+    <img id="hiking" width="40" height="40" src="images/hiking.png" alt="Hiking">
+    <img id="ghost" width="40" height="53" src="images/ghost.png" alt="Ghost Story">
+    <img id="book" width="40" height="55" src="images/book.jpg" alt="Jane Austen Novels ">
+
     <script>
 
-var myGamePiece;
-var myObstacles = [];
-var myBonuses = [];
-var myScore;
+        var myGamePiece;
+        var myObstacles = [];
+        var myBonuses = [];
+        var bonusesImages = [];
+        var myScore;
+        var catchedBonuses = 0;
+        var myCatchedBonuses;
 
-function startGame() {
-    var img = document.getElementById("ruth");
-    myGamePiece = new component(30, 40, "red", 10, 120, "image", img);
-    myGamePiece.gravity = 0.05;
-    myScore = new component("30px", "Consolas", "black", 250, 40, "text");
-    myGameArea.start();
-}
+        function startGame() {
+            var img = document.getElementById("ruth");
+            myGamePiece = new component(30, 40, "red", 10, 120, "image", img);
+            myGamePiece.gravity = 0.05;
+            myScore = new component("30px", "Consolas", "black", 250, 40, "text");
+            myCatchedBonuses = new component("30px", "Consolas", "pink", 250, 80, "text");
 
-var myGameArea = {
-    canvas : document.createElement("canvas"),
-    start : function() {
-        this.canvas.width = 480;
-        this.canvas.height = 270;
-        this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, 20);
-        },
-    clear : function() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-}
+            var bonus1 = document.getElementById("dietCoke");
+            var bonus2 = document.getElementById("cat");
+            var bonus3 = document.getElementById("hiking");
+            var bonus4 = document.getElementById("ghost");
+            var bonus5 = document.getElementById("book");
 
-function component(width, height, color, x, y, type, image) {
-    this.type = type;
-    this.score = 0;
-    this.width = width;
-    this.height = height;
-    this.speedX = 0;
-    this.speedY = 0;
-    this.x = x;
-    this.y = y;
-    this.gravity = 0;
-    this.gravitySpeed = 0;
-    this.image = image;
-    this.update = function() {
-        ctx = myGameArea.context;
-        if (this.type == "text") {
-            ctx.font = this.width + " " + this.height;
-            ctx.fillStyle = color;
-            ctx.fillText(this.text, this.x, this.y);
-        } else if(this.type == "color") {
-            ctx.fillStyle = color;
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-        }else {
-            ctx.drawImage(this.image, this.x, this.y);
+            bonusesImages.push(bonus1, bonus2, bonus3, bonus4, bonus5);
+
+            myGameArea.start();
         }
-    }
-    this.newPos = function() {
-        this.gravitySpeed += this.gravity;
-        this.x += this.speedX;
-        this.y += this.speedY + this.gravitySpeed;
-        this.hitBottom();
-    }
-    this.hitBottom = function() {
-        var rockbottom = myGameArea.canvas.height - this.height;
-        if (this.y > rockbottom) {
-            this.y = rockbottom;
+
+        var myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = 880;
+                this.canvas.height = 470;
+                this.context = this.canvas.getContext("2d");
+                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                this.frameNo = 0;
+                this.interval = setInterval(updateGameArea, 20);
+            },
+            clear: function () {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+
+        function component(width, height, color, x, y, type, image) {
+            this.type = type;
+            this.score = 0;
+            this.width = width;
+            this.height = height;
+            this.speedX = 0;
+            this.speedY = 0;
+            this.x = x;
+            this.y = y;
+            this.gravity = 0;
             this.gravitySpeed = 0;
+            this.image = image;
+            this.update = function () {
+                ctx = myGameArea.context;
+                if (this.type == "text") {
+                    ctx.font = this.width + " " + this.height;
+                    ctx.fillStyle = color;
+                    ctx.fillText(this.text, this.x, this.y);
+                } else if (this.type == "color") {
+                    ctx.fillStyle = color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                } else {
+                    ctx.drawImage(this.image, this.x, this.y);
+                }
+            }
+            this.newPos = function () {
+                this.gravitySpeed += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY + this.gravitySpeed;
+                this.hitBottom();
+            }
+            this.hitBottom = function () {
+                var rockbottom = myGameArea.canvas.height - this.height;
+                if (this.y > rockbottom) {
+                    this.y = rockbottom;
+                    this.gravitySpeed = 0;
+                }
+            }
+            this.crashWith = function (otherobj) {
+                var myleft = this.x;
+                var myright = this.x + (this.width);
+                var mytop = this.y;
+                var mybottom = this.y + (this.height);
+                var otherleft = otherobj.x;
+                var otherright = otherobj.x + (otherobj.width);
+                var othertop = otherobj.y;
+                var otherbottom = otherobj.y + (otherobj.height);
+                var crash = true;
+                if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+                    crash = false;
+                }
+                return crash;
+            }
         }
-    }
-    this.crashWith = function(otherobj) {
-        var myleft = this.x;
-        var myright = this.x + (this.width);
-        var mytop = this.y;
-        var mybottom = this.y + (this.height);
-        var otherleft = otherobj.x;
-        var otherright = otherobj.x + (otherobj.width);
-        var othertop = otherobj.y;
-        var otherbottom = otherobj.y + (otherobj.height);
-        var crash = true;
-        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
-            crash = false;
+
+        function updateGameArea() {
+            var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+            for (i = 0; i < myObstacles.length; i += 1) {
+                if (myGamePiece.crashWith(myObstacles[i])) {
+                    return;
+                }
+            }
+
+            for (i = 0; i < myBonuses.length; i += 1) {
+                if (myGamePiece.crashWith(myBonuses[i])) {
+                    catchedBonuses += 100;
+                }
+            }
+
+            myGameArea.clear();
+            myGameArea.frameNo += 1;
+            if (myGameArea.frameNo == 1 || everyinterval(150)) {
+                x = myGameArea.canvas.width;
+                minHeight = 20;
+                maxHeight = 200;
+                height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+                minGap = 50;
+                maxGap = 600;
+                gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+                myObstacles.push(new component(10, height, "green", x, 0, "color"));
+                myObstacles.push(new component(10, x - height - gap, "green", x, height + gap, "color"));
+            }
+
+            if (myGameArea.frameNo == 1 || everyinterval(300)) {
+                x = myGameArea.canvas.width + Math.floor((Math.random() * 100) + 50);
+                minHeight = 20;
+                maxHeight = 200;
+                height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+                y = Math.floor((Math.random() * 200) + 20);
+
+                myBonuses.push(new component(10, height, "pink", x, y, "image", bonusesImages[Math.floor(Math.random() * bonusesImages.length)]));
+
+            }
+            for (i = 0; i < myObstacles.length; i += 1) {
+                myObstacles[i].x += -1;
+                myObstacles[i].update();
+            }
+
+            for (i = 0; i < myBonuses.length; i += 1) {
+                myBonuses[i].x += -1;
+                myBonuses[i].update();
+            }
+            myScore.text = "SCORE: " + myGameArea.frameNo + " days";
+            myScore.update();
+
+            myCatchedBonuses.text = "Bonus days: " + catchedBonuses ;
+            myCatchedBonuses.update();
+
+            myGamePiece.newPos();
+            myGamePiece.update();
         }
-        return crash;
-    }
-}
 
-function updateGameArea() {
-    var x, height, gap, minHeight, maxHeight, minGap, maxGap;
-    for (i = 0; i < myObstacles.length; i += 1) {
-        if (myGamePiece.crashWith(myObstacles[i])) {
-            return;
+        function everyinterval(n) {
+            if ((myGameArea.frameNo / n) % 1 == 0) { return true; }
+            return false;
         }
-    }
 
-    for (i = 0; i < myBonuses.length; i += 1) {
-        if (myGamePiece.crashWith(myBonuses[i])) {
-            myScore+=1;
+        function accelerate(n) {
+            myGamePiece.gravity = n;
         }
-    }
-	
-    myGameArea.clear();
-    myGameArea.frameNo += 1;
-    if (myGameArea.frameNo == 1 || everyinterval(150)) {
-        x = myGameArea.canvas.width;
-        minHeight = 20;
-        maxHeight = 200;
-        height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
-        minGap = 50;
-        maxGap = 200;
-        gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
-        myObstacles.push(new component(10, height, "green", x, 0,"color"));
-        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap, "color"));
-	}
-
-	if (myGameArea.frameNo == 1 || everyinterval(300)) {
-        x = myGameArea.canvas.width+Math.floor((Math.random() * 100) + 50);
-        minHeight = 20;
-        maxHeight = 200;
-        height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
-		y = Math.floor((Math.random() * 200) + 20);
-        myBonuses.push(new component(10, height, "pink", x, y,"color"));
-        
-	}
-    for (i = 0; i < myObstacles.length; i += 1) {
-        myObstacles[i].x += -1;
-        myObstacles[i].update();
-    }
-
-    for (i = 0; i < myBonuses.length; i += 1) {
-        myBonuses[i].x += -1;
-        myBonuses[i].update();
-    }
-    myScore.text="SCORE: " + myGameArea.frameNo + " days";
-    myScore.update();
-    myGamePiece.newPos();
-    myGamePiece.update();
-}
-
-function everyinterval(n) {
-    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
-    return false;
-}
-
-function accelerate(n) {
-    myGamePiece.gravity = n;
-}
     </script>
     <br>
     <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)">ACCELERATE</button>
